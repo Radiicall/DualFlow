@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(not(feature = "fake"))]
 use crate::objects::Trigger;
+#[cfg(feature = "fake")]
+use crate::fake::Trigger;
 
 #[derive(Deserialize, Serialize)]
 pub struct AppSettings {

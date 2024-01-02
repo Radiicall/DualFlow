@@ -11,13 +11,21 @@ use xdg::BaseDirectories;
 use serde_json::{json, Value};
 use sysinfo::System;
 
+#[cfg(not(feature = "fake"))]
+use objects::Controller;
+#[cfg(feature = "fake")]
+use fake::Controller;
+
 //mod checksum;
+#[cfg(not(feature = "fake"))]
 mod objects;
+#[cfg(feature = "fake")]
+mod fake;
 mod settings;
 
 static HID_API: Mutex<Lazy<HidApi>> = Mutex::new(Lazy::new(|| HidApi::new().unwrap()));
 
-static mut CONTROLLER: Mutex<Option<objects::Controller>> = Mutex::new(None);
+static mut CONTROLLER: Mutex<Option<Controller>> = Mutex::new(None);
 
 static CONFIG_DIR: Mutex<Lazy<PathBuf>> = Mutex::new(Lazy::new(|| BaseDirectories::new().unwrap().create_config_directory("dualflow").unwrap()));
 
@@ -165,9 +173,7 @@ fn delete_program(program: &str) {
 }
 
 fn main() {
-    unsafe { *CONTROLLER.get_mut().unwrap() = Some(objects::Controller::new(&HID_API.lock().unwrap()).unwrap()) }
-
-
+    unsafe { *CONTROLLER.get_mut().unwrap() = Some(Controller::new(&HID_API.lock().unwrap()).unwrap()) }
 
     tauri::Builder::default()
         .setup(|app| {
